@@ -1,0 +1,42 @@
+{
+    "lists": [
+      {
+        "icon": "photo-camera",
+        "label": "Take photo"
+      },
+      {
+        "icon": "photo",
+        "label": "Choose image"
+      },
+      {
+        "icon": "brush",
+        "label": "Drawing"
+      },
+      {
+        "icon": "mic",
+        "label": "Recording"
+      },
+      {
+        "icon": "check-box",
+        "label": "Checkboxes"
+      }
+    ],
+    "grids": [
+      {
+        "label": "Upload Folder",
+        "icon": "upload",
+        "color": "#3b5998"
+      },
+      {
+        "label": "Upload File",
+        "icon": "file-upload",
+        "color": "#38A1F3"
+      },
+      {
+        "label": "Create New Folder",
+        "icon": "folder-plus",
+        "color": "#DD4B39"
+      }
+      
+    ]
+  }
