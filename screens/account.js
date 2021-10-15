@@ -1,6 +1,7 @@
 import React, {useCallback,useEffect} from "react";
 import styled from 'styled-components';
-import { Text, View, Image, TouchableOpacity, Modal,Alert,NativeModules, Slider } from 'react-native';
+import { Text, View, Image, TouchableOpacity, Modal,Alert,NativeModules } from 'react-native';
+import Slider from "@react-native-community/slider"
 import AsyncStorage from "@react-native-community/async-storage";
 import Svg, {Circle} from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';

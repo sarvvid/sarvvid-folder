@@ -340,6 +340,7 @@ export default function SignUp({navigation}) {
                         console.log(mypub);
                         console.log(mypri);
                         AsyncStorage.setItem('mypub',mypub);
+                        AsyncStorage.setItem('mypri',mypri)
                        console.log(resp.filesys)
                            
                         

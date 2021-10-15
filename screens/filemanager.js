@@ -1,4 +1,4 @@
-import React,{useEffect, useState} from "react";
+import React,{useEffect, useState,useRef} from "react";
 import styled from 'styled-components';
 import { Text, View, Image, FlatList, TouchableOpacity, TextInput , SafeAreaView,StyleSheet,ScrollView, NativeModules, Modal} from 'react-native';
 import icondata from './static.json'
@@ -8,9 +8,11 @@ import Svg, {Circle} from 'react-native-svg';
 import { useTheme } from '../contexts/themeContext';
 import Toast from "react-native-toast-message";
 import FAIcon from "react-native-vector-icons/FontAwesome5";
+import FileViewer from 'react-native-file-viewer';
 import ImagePicker from 'react-native-image-crop-picker';
 import RNFS from 'react-native-fs'
 import SweetAlert from 'react-native-sweet-alert';
+import PTRView from 'react-native-pull-to-refresh';
 import Footer from '../components/footer';
 import settings from '../img/settings.png';
 import Account from '../img/account.png'
@@ -37,6 +39,7 @@ import docadd from '../img/docadd.png';
 import AnimatedBar from "react-native-animated-bar";
 import other from '../img/other.png';
 import othera from '../img/othera.png';
+import LottieView from 'lottie-react-native';
 import file from '../img/file.png';
 import filea from '../img/filea.png';
 import fileadd from '../img/fileadd.png';
@@ -52,6 +55,7 @@ import fileimgdark from '../img/fileimgdark.png';
 import addfolderdark from '../img/add.png';
 import optionsdark from '../img/optionsdark.png';
 import close from '../img/close.png';
+import animation from '../img/animation1.gif'
 export default function FileManager({navigation})  {
   const normalizeFilePath = (path) => (path.startsWith('file://') ? path.slice(7) : path);
   const [loading,setloading] = React.useState(false);
@@ -114,14 +118,22 @@ export default function FileManager({navigation})  {
     const [data,setdata] = React.useState([])
     const [modalOpen, setModalOpen] = useState(false);
     const [newFolderName, setNewFolderName] = useState("");
+    const [extraPaddingTop, setExtraPaddingTop] = useState(0);
     const [done,setdone] = React.useState(false)
     const data1 = data
     const [filestructure,setfilestructure] = React.useState({});
     const [imei,setimei] = React.useState('')
-
+    const [offsetY, setOffsetY] = useState(0);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [arr,setarr] = React.useState([])
     const [auth,setauth] = React.useState('')
-
+    useEffect(() => {
+      if (isRefreshing) {
+        setExtraPaddingTop(refreshingHeight);
+      } else {
+        setExtraPaddingTop(0);
+      }
+    }, [isRefreshing]);
     useEffect(()=>{
    
           (async()=>{
@@ -173,7 +185,63 @@ export default function FileManager({navigation})  {
 
       })()
     },[done])
+const refresh = (async()=>{
+  const im = await AsyncStorage.getItem("authtoken")
+  setauth(im)
+  const g = await AsyncStorage.getItem('gender');
+  console.log(g)
+  if (g == 'male1'){
+      seturi(require('../img/avatar/male1.png'))
+  }
+  else if(g=="female1"){
+      seturi(require("../img/avatar/female1.png"))
+  }
+  else if(g=="male2"){
+      seturi(require("../img/avatar/male2.png"));
+  }
+  else if(g=="male3"){
+      seturi(require("../img/avatar/male3.png"));
+  }
+  else if(g=="female3"){
+      seturi(require("../img/avatar/female3.png"));
+  }
+  var token = await AsyncStorage.getItem("userToken")
+  setimei(token)
+var ping_res = 0;
+let i;
+for(i = 0; i < 10;i++){
+const ms = await Ping.start("103.155.73.35",{timeout : 500});
+ping_res += ms;
+}
+ping_res = ping_res /10;
+setping(ping_res);
+fetch(`http://103.155.73.35:3000/ms/?ms=${ping_res}&IMEI=${token}`).then((resp)=>{
+      console.log("pinged");
+})
+  var tempfile = await AsyncStorage.getItem("fileSystem")
+  console.log("DATTTTTTTTTT>>>>>>>>>>>>>>>>>>>>>",tempfile)
+  tempfile = JSON.parse(tempfile)
+  var temparr = tempfile["1382b6993e9f270cb1c29833be3f5750"]["children"]
+  setarr(temparr)
+ 
+  setfilestructure(tempfile)
+  var temp = []
+  for(let i=0;i<temparr.length;i++){
+    temp.push(tempfile[temparr[i]])
+  }
+  setdata(temp)
 
+
+})
+const lottieViewRef = useRef(null);
+function onRelease() {
+  if (offsetY <= -refreshingHeight && !isRefreshing) {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 3000);
+  }
+}
     const uploadFile = async () => {
        bottompop.close()
       // let result = await DocumentPicker.getDocumentAsync({type: documentType});
@@ -392,9 +460,9 @@ export default function FileManager({navigation})  {
                         <Image source = {search}/>
                     </TouchableOpacity>
            </Input>
-
-           
-                <SafeAreaView style={{paddingBottom:60}}>
+          {isRefreshing ? <Image source={animation} style={{height:100,width:100,marginBottom:-130}}/> :null } 
+           <PTRView onRefresh={()=>{refresh()}} style={{flex:1}}>
+                
                 <FlatGrid
                 itemDimension={130}
                 data={data}
@@ -434,14 +502,15 @@ export default function FileManager({navigation})  {
                           `/storage/emulated/0/Pictures/SarvvidBox/${item.name}`,
                           pri,
                         ) 
-                        FileViewer.open(`file:///storage/emulated/0/Pictures/SarvvidBox/${item.name}`,{onDismiss : ()=>{console.log("dismiss");}})
-                        RNFS.unlink(`file:///storage/emulated/0/Pictures/SarvvidBox/${item.name}`)
+                        FileViewer.open(`file:///storage/emulated/0/Pictures/SarvvidBox/${item.name}`,{onDismiss : ()=>{RNFS.unlink(`file:///storage/emulated/0/Pictures/SarvvidBox/${item.name}`)}})
+                        
                         RNFS.unlink(`${RNFetchBlob.fs.dirs.DownloadDir}/${item.name}_enc`)
                   })
                   
   
           }
-                }}>
+                }}
+                >
                           <View style = {{}}>
                                 <Image source = { item.type === "__folder__" ? darkTheme ? folderimg : folderimg : darkTheme ? fileimg : fileimgdark}/>
                                 </View>
@@ -451,6 +520,11 @@ export default function FileManager({navigation})  {
                             </View>
                     
                     </Block>)}
+                onResponderRelease={onRelease}
+                ListHeaderComponent={(
+                  <View style={{paddingTop:extraPaddingTop}}>
+                    </View>
+                )}
                 />
                 
                
@@ -481,7 +555,7 @@ export default function FileManager({navigation})  {
                     </View>
                 }
                 /> */}
-                </SafeAreaView>
+            </PTRView>
             </Container>
         
             <RBSheet
@@ -541,7 +615,7 @@ export default function FileManager({navigation})  {
                       </View>
                       <TextInput onChangeText = {(value) => {setNewFolderName(value)}} value={newFolderName} style = {{borderBottomWidth:2, borderColor:"#0092ff", width:"100%", marginTop:20}}/>
                       <TouchableOpacity onPress={()=>{
-                        
+                        setModalOpen(false)
                         var tempfile = filestructure
                         var newEntry = {};
                         newEntry.parentPath = "/";
@@ -853,6 +927,14 @@ const styles = StyleSheet.create({
       fontSize: 16,
       marginBottom: 20,
       color: "#666"
+    },
+    lottieView: {
+      height: 100,
+      width: 100,
+      position: 'absolute',
+      top: 100  ,
+      left: 0,
+      right: 0,
     },
     listButton: {
       flexDirection: "row",

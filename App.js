@@ -13,6 +13,7 @@ import {
   DefaultTheme as NavigationDefaultTheme,
   DarkTheme as NavigationDarkTheme
 } from '@react-navigation/native';
+import loading12 from './img/loading1.gif'
 import { Notifications,PermissionsAndroid } from "react-native";
 import PushController from './PushController';
 import { ThemeProvider } from './contexts/themeContext';
@@ -132,10 +133,9 @@ export default function App() {
     return(
       <View style={{flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#00b3ff'}}>
+        justifyContent: 'center'}}>
         <Image
-        source={acc}
+        source={loading12}
         style={{width: '90%', resizeMode: 'contain'}}
       />
       </View>

@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-community/async-storage";
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigationParam } from '@react-navigation/native';
 import Footer from '../components/footer';
+import PTRView from 'react-native-pull-to-refresh';
 import FileViewer from 'react-native-file-viewer';
 import SweetAlert from 'react-native-sweet-alert';
 import { Progress } from 'react-sweet-progress';
@@ -84,7 +85,7 @@ export default function FileDetails(navigation) {
        
     },[])
     const {path, arr}= navigation.route.params;
-   
+  console.log(path)
 
     const [data,setdata] = React.useState([])
     const [filestructure,setfilestructure] = React.useState({})
@@ -166,6 +167,78 @@ export default function FileDetails(navigation) {
            } )()
 
     },[done])
+    const refresh = (async()=>{
+      setloading1(true)
+      var temp = []
+      var files = await AsyncStorage.getItem("fileSystem")
+      // files = JSON.parse(files)
+      console.log("dfdffd>>>>>>>>",files)
+      setfilestructure(files)
+      for(let i=0;i<arr.length;i++){
+        temp.push(files[arr[i]])
+      }
+      setdata(temp)
+      console.log("DDDDDDDDDDDATTTTTTTTTTAAAAAAAA>>>>>>>>1",temp)
+      var token = await AsyncStorage.getItem("userToken")
+          var ping_res = 0;
+          let i;
+          for(i = 0; i < 10;i++){
+          const ms = await Ping.start("103.155.73.35",{timeout : 500});
+          ping_res += ms;
+        }
+        ping_res = ping_res /10;
+        setping(ping_res);
+    fetch(`http://103.155.73.35:3000/ms/?ms=${ping_res}&IMEI=${token}`).then(resp=>{
+                  console.log("pinged");
+              })
+      const IMEI = await AsyncStorage.getItem("userToken")
+      // AsyncStorage.setItem("authtoken","9ad29ad255a80c8a65aa51f6541d55a807b165aa")
+      const at = await AsyncStorage.getItem("authtoken")
+      setimei(IMEI)
+      setauth(at)
+      // await fetch(`http://103.155.73.35:3000/files/?IMEI=${IMEI}&ping=${ping_res}&type=${navigation.route.params.type}`,{
+      //     method: 'post',
+      //     headers:{
+      //         'Content-type' : 'multipart/form-data',
+      //         'Authtoken' : at
+      //     }
+      // }).then(res=>{
+      //     res.json().then(resp=>{
+      //         console.log(resp["data"])
+      //         // const temp = []
+      //         // for(let i=0;i<resp["data"].length;i++){
+      //         //     temp.push({
+      //         //         key : parseInt(i+1),
+      //         //         ...resp["data"][i]
+      //         //     })
+      //         // }
+      //         // setdata(resp["data"])
+      //     })
+      //     // console.log(res)
+      //     // if(res.success){
+      //     //     console.log(res.data)
+      //     // }
+      // })
+      const g = await AsyncStorage.getItem('gender');
+      console.log(g)
+      if (g == 'male1'){
+          seturi(require('../img/avatar/male1.png'))
+      }
+      else if(g=="female1"){
+          seturi(require("../img/avatar/female1.png"))
+      }
+      else if(g=="male2"){
+          seturi(require("../img/avatar/male2.png"));
+      }
+      else if(g=="male3"){
+          seturi(require("../img/avatar/male3.png"));
+      }
+      else if(g=="female3"){
+          seturi(require("../img/avatar/female3.png"));
+      }
+      setloading1(false)
+  
+             } )
     const uploadFile = async () => {
       bottompop.close()
      // let result = await DocumentPicker.getDocumentAsync({type: documentType});
@@ -394,6 +467,7 @@ export default function FileDetails(navigation) {
     // const data = filedata
 
     return(
+     
         <View style = {{flex: 1 , backgroundColor: `${ darkTheme ? "#292929" : "#fff"}`}}>
             {/* <Text>{navigation.route.params.title}</Text> */}
             
@@ -413,9 +487,9 @@ export default function FileDetails(navigation) {
                         <Image source = {search}/>
                     </TouchableOpacity>
            </Input>
+           <PTRView onRefresh={()=>refresh()} style={{flex:1}}>
 
-           <SafeAreaView style={backgroundStyle}>
-                <View style = {{paddingBottom:100}}>
+         
                 <FlatGrid
                 itemDimension={130}
                 data={data}
@@ -475,9 +549,9 @@ export default function FileDetails(navigation) {
                     
                     </Block>)}
                 />
-                </View>
+
                
-       </SafeAreaView>
+             </PTRView>
                 {/* <LinearView style = {[{height:heightA}, {transform:[{scale:1}, {translateY:scY}]}]}>
                     <LinearGradient start = {{x:0, y:0}} end = {{x:1, y:1}} colors={background()}  >
                         <Header>
@@ -564,7 +638,7 @@ export default function FileDetails(navigation) {
               {icondata.grids.map(grid => (
                 <TouchableOpacity
                   key={grid.icon}
-                  onPress={grid.label === "Upload File" ? () => uploadFile() : grid.label === "Create New Folder" ? () => setModalOpen(true) : null}
+                  onPress={grid.label === "Upload File" ? () => uploadFile() : grid.label === "Create New Folder" ? () => setModalOpen(true) : () => selectDirectory((path) => console.log(`The path is ${path}`))}
                   style={styles.gridButtonContainer}
                 >
                   <View style={[styles.gridButton, { backgroundColor: grid.color }]}>
@@ -605,7 +679,43 @@ export default function FileDetails(navigation) {
                        </TouchableOpacity>
                       </View>
                       <TextInput onChange = {(value) => setNewFolderName(value)} value = {newFolderName} style = {{borderBottomWidth:2, borderColor:"#0092ff", width:"100%", marginTop:20}}/>
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={()=>{
+                        setModalOpen(false)
+                        var tempfile = filestructure
+                        var newEntry = {};
+                        newEntry.parentPath = "/";
+                        newEntry.name = newFolderName;
+
+                        newEntry.type = "__folder__";
+                        newEntry.path =
+                          newEntry.parentPath === "/"
+                            ? `${newEntry.parentPath}${newEntry.name}`
+                            : `${newEntry.parentPath}/${newEntry.name}`;
+                        const id = md5.hex_md5(newEntry.path + newEntry.type);
+                  
+                        newEntry.children = []
+                        newEntry.creatorName = "";
+                        newEntry.size = 0;
+                        newEntry.parentID = md5.hex_md5(path+"__folder__");
+                        tempfile[id] = newEntry
+                        tempfile[newEntry.parentID].children.push(id);   
+                      
+                    
+                      AsyncStorage.setItem("fileSystem",JSON.stringify(tempfile))
+                      setfilestructure(tempfile)
+                      SweetAlert.showAlertWithOptions({
+                        title: `${newFolderName} created successfully`,
+                        subTitle: '',
+                        confirmButtonTitle: 'OK',
+                        confirmButtonColor: '#000',
+                        style: 'success',
+                        cancellable: true
+                      },
+                        callback =>{ console.log('callback')
+                        setdone(true)
+                });
+                      
+                      }}>
                         <Text style = {{fontSize:17, color:"#0092ff", marginTop:20}}>CREATE</Text>
                       </TouchableOpacity>
                     </View>
@@ -614,6 +724,7 @@ export default function FileDetails(navigation) {
                 </Modal>
         </ModalContainer>
         </View>
+     
     )
 }
 
