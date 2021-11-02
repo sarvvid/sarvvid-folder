@@ -97,7 +97,7 @@ export default function FileDetails(navigation) {
     setloading1(true)
     var temp = []
     var files = await AsyncStorage.getItem("fileSystem")
-    // files = JSON.parse(files)
+    files = JSON.parse(files)
     console.log("dfdffd>>>>>>>>",files)
     setfilestructure(files)
     for(let i=0;i<arr.length;i++){

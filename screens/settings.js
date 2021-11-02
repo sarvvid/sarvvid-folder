@@ -123,7 +123,7 @@ export default function Settings({navigation})  {
                         <Item><ItemText onPress = {() => navigation.navigate("Faq")} dark = {darkTheme}>FAQ</ItemText></Item>
                         <Item><ItemText onPress = {() => navigation.navigate("Referral")} dark = {darkTheme}>Get Free Bitcoin👋</ItemText></Item>
                         <Item><ItemText onPress = {() => signOut()} dark = {darkTheme} onPress={()=>{
-                            alert("Will be available in Future Release")
+                            navigation.navigate("P2P")
                         }}>Sarvvid P2P</ItemText></Item>
                         <Item><ItemText onPress = {() => signOut()} dark = {darkTheme}>Logout</ItemText></Item>
                         

@@ -126,7 +126,10 @@ export default function FileManager({navigation})  {
     const [offsetY, setOffsetY] = useState(0);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [arr,setarr] = React.useState([])
-    const [auth,setauth] = React.useState('')
+    const [auth,setauth] = React.useState('');
+    useEffect(()=>{
+      setdone(true)
+    },[])
     useEffect(() => {
       if (isRefreshing) {
         setExtraPaddingTop(refreshingHeight);
@@ -637,6 +640,7 @@ function onRelease() {
                     
                       AsyncStorage.setItem("fileSystem",JSON.stringify(tempfile))
                       setfilestructure(tempfile)
+                      setdone(true)
                       SweetAlert.showAlertWithOptions({
                         title: `${newFolderName} created successfully`,
                         subTitle: '',
@@ -645,8 +649,8 @@ function onRelease() {
                         style: 'success',
                         cancellable: true
                       },
-                        callback =>{ console.log('callback')
-                        setdone(true)
+                        callback =>{ 
+                        
                 });
                       
                       }}>

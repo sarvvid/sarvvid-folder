@@ -10,6 +10,8 @@ import Settings from '../screens/settings';
 import Account from '../screens/account';
 import FileDetails from '../screens/filedetails';
 import Chat from '../screens/chat';
+import P2P from '../screens/P2P';
+import Chatroom from '../screens/Chatroom'
 import ChatIntro from '../screens/chatIntro';
 import Scanner from '../screens/scanner';
 import Faq from '../screens/faq';
@@ -208,6 +210,8 @@ const HomeStackNavigator = () => {
 			<Stack.Screen name='Faq' component={Faq}/>
 			<Stack.Screen name='Terms' component={Terms}/>
             <Stack.Screen name='Referral' component={Referral}/>
+			<Stack.Screen name="P2P" component={P2P}/>
+			<Stack.Screen name="Chatroom" component={Chatroom}/>
 		</Stack.Navigator>
 	);
 };
